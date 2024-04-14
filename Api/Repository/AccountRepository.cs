@@ -48,6 +48,49 @@ namespace Api.Repository
             }
         }
 
+        public async Task<GeneralResponse> AddNewAdmin(UserDto adminDTO)
+        {
+            // Check if the adminDTO is null
+            if (adminDTO is null)
+                return new GeneralResponse(false, "Model is empty");
+
+            // Check if the user with the provided email already exists
+            var existingUser = await userManager.FindByEmailAsync(adminDTO.Email);
+            if (existingUser != null)
+                return new GeneralResponse(false, "Admin with this email already exists");
+
+            // Create a new ApplicationUser instance
+            var newAdmin = new ApplicationUser()
+            {
+                Name = adminDTO.Name,
+                Email = adminDTO.Email,
+                PasswordHash = adminDTO.Password,
+                UserName = adminDTO.Email
+            };
+
+            // Create the new admin user in the user manager
+            var createAdminResult = await userManager.CreateAsync(newAdmin, adminDTO.Password);
+            if (!createAdminResult.Succeeded)
+                return new GeneralResponse(false, "Error occurred while creating admin account");
+
+            // Assign the "Admin" role to the new user
+            var adminRole = await roleManager.FindByNameAsync("Admin");
+            if (adminRole == null)
+            {
+                // If the "Admin" role doesn't exist, create it
+                adminRole = new IdentityRole("Admin");
+                await roleManager.CreateAsync(adminRole);
+            }
+
+            // Add the "Admin" role to the new admin user
+            var addToRoleResult = await userManager.AddToRoleAsync(newAdmin, "Admin");
+            if (!addToRoleResult.Succeeded)
+                return new GeneralResponse(false, "Failed to assign admin role to the new user");
+
+            // Return a successful response
+            return new GeneralResponse(true, "New admin account created successfully");
+        }
+
         public async Task<LoginResponse> LoginAccount(LoginDto loginDTO)
         {
             if (loginDTO == null)

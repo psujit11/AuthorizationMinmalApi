@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Requirements.Contracts;
 using Requirements.DTOs;
+using System.Data;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -108,6 +109,15 @@ app.MapPost("/login", async (IUserAccount userAccount, LoginDto logindto) =>
     return await userAccount.LoginAccount(logindto);
 
 });
+
+app.MapPost("/addadmin",
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+async (IUserAccount userAccount, UserDto userdto) =>
+    {
+        return await userAccount.AddNewAdmin(userdto);
+    }
+
+    );
 
 app.MapGet("/weatherforecast",
    [Authorize(AuthenticationSchemes =JwtBearerDefaults.AuthenticationScheme,Roles ="Admin")] () =>

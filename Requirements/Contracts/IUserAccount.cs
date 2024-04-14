@@ -7,5 +7,6 @@ namespace Requirements.Contracts
     {
         Task<GeneralResponse> CreateAccount(UserDto userDTO);
         Task<LoginResponse> LoginAccount(LoginDto loginDTO);
+        Task<GeneralResponse> AddNewAdmin(UserDto adminDTO);
     }
 }
